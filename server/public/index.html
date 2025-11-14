@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Door Lock System - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .status-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .dashboard {
+            padding: 30px;
+        }
+
+        .error-alert {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .error-alert h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .error-alert p {
+            color: #856404;
+            margin-bottom: 5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid;
+        }
+
+        .stat-card.authorized { border-left-color: #28a745; }
+        .stat-card.unauthorized { border-left-color: #dc3545; }
+        .stat-card.errors { border-left-color: #ffc107; }
+
+        .stat-card h4 {
+            color: #495057;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .stat-card .number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-card.authorized .number { color: #28a745; }
+        .stat-card.unauthorized .number { color: #dc3545; }
+        .stat-card.errors .number { color: #ffc107; }
+
+        .logs-section h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .log-entry {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-entry.authorized {
+            border-left: 4px solid #28a745;
+            background: #f0fff4;
+        }
+
+        .log-entry.unauthorized {
+            border-left: 4px solid #dc3545;
+            background: #fff5f5;
+        }
+
+        .log-entry.error {
+            border-left: 4px solid #ffc107;
+            background: #fffbf0;
+        }
+
+        .log-info {
+            flex: 1;
+        }
+
+        .log-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        .log-status.authorized { background: #28a745; }
+        .log-status.unauthorized { background: #dc3545; }
+        .log-status.error { background: #ffc107; color: #212529; }
+
+        .timestamp {
+            color: #6c757d;
+            font-size: 0.85em;
+        }
+
+        .device-info {
+            color: #495057;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Smart Door Lock System</h1>
+            <div class="status-badge">🔴 DEVICE OFFLINE</div>
+        </div>
+
+        <div class="dashboard">
+            <div class="error-alert">
+                <h3>⚠️ System Error Detected</h3>
+                <p><strong>Last Activity:</strong> November 10, 2025 at 7:12 PM</p>
+                <p><strong>Error:</strong> Device connection lost - WiFi timeout after multiple unauthorized attempts</p>
+                <p><strong>Status:</strong> Maintenance required</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card authorized">
+                    <h4>Authorized Access (Nov 10)</h4>
+                    <div class="number" id="authorized">3</div>
+                </div>
+                
+                <div class="stat-card unauthorized">
+                    <h4>Security Alerts (Nov 10)</h4>
+                    <div class="number" id="unauthorized">3</div>
+                </div>
+                
+                <div class="stat-card errors">
+                    <h4>System Errors</h4>
+                    <div class="number" id="errors">1</div>
+                </div>
+            </div>
+
+            <div class="logs-section">
+                <h3>📋 Activity Log - November 10, 2025</h3>
+                <div id="logs-container">
+                    Loading activity logs...
+                </div>
+            </div>
+        </div>
+    </div></body>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        async function loadData() {
+            try {
+                const response = await fetch(`${API_BASE}/api/logs`);
+                const data = await response.json();
+                
+                const container = document.getElementById('logs-container');
+                
+                container.innerHTML = data.logs.map(log => {
+                    const date = new Date(log.timestamp);
+                    const timeStr = date.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    let statusText, statusClass;
+                    if (log.accessType === 'authorized') {
+                        statusText = '✅ Authorized';
+                        statusClass = 'authorized';
+                    } else if (log.accessType === 'unauthorized') {
+                        statusText = '🚨 Denied';
+                        statusClass = 'unauthorized';
+                    } else {
+                        statusText = '⚠️ Error';
+                        statusClass = 'error';
+                    }
+                    
+                    return `
+                        <div class="log-entry ${statusClass}">
+                            <div class="log-info">
+                                <div class="device-info">
+                                    📍 ${log.location} 
+                                    ${log.accessType === 'authorized' ? `• 👤 User #${log.fingerID}` : ''}
+                                    ${log.accessType === 'error' ? '• System malfunction detected' : ''}
+                                </div>
+                                <div class="timestamp">⏰ ${timeStr}</div>
+                            </div>
+                            <div class="log-status ${statusClass}">
+                                ${statusText}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                document.getElementById('logs-container').innerHTML = 
+                    '<div style="text-align: center; color: #dc3545;">❌ Failed to load activity logs</div>';
+            }
+        }
+
+        // Load data when page loads
+        loadData();
+        
+        // Add a demo note
+        setTimeout(() => {
+            const note = document.createElement('div');
+            note.innerHTML = `
+                <div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: center; color: #495057;">
+                    <small>📝 <strong>Demo Data:</strong> This is a demonstration of the IoT Door Lock System showing activity from November 10, 2025</small>
+                </div>
+            `;
+            document.querySelector('.dashboard').appendChild(note);
+        }, 1000);
+    </script>
+</body>
+</html>

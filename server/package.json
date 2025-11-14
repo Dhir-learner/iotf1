@@ -1,0 +1,23 @@
+{
+  "name": "iot-door-lock-demo",
+  "version": "1.0.0",
+  "description": "IoT Door Lock System Demo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "keywords": [
+    "iot",
+    "door-lock",
+    "demo"
+  ],
+  "license": "MIT"
+}
