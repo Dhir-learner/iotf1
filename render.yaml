@@ -1,0 +1,17 @@
+# Render Deployment Configuration
+
+# Build Command
+npm install
+
+# Start Command  
+npm start
+
+# Environment Variables to set in Render Dashboard:
+# NODE_ENV=production
+# EMAIL_USER=your-email@gmail.com
+# EMAIL_PASS=your-app-password  
+# NOTIFICATION_EMAIL=recipient@gmail.com
+# ADMIN_KEY=your-secret-admin-key
+
+# Auto-Deploy: Yes
+# Branch: main (or your default branch)

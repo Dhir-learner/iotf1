@@ -19,8 +19,8 @@
    - Choose the repository with your server code
 
 2. **Configure Service**:
-   - **Name**: `fingerprint-door-lock` (or your choice)
-   - **Root Directory**: `server` (if code is in server folder)
+   - **Name**: `iot-door-lock-demo` (or your choice)
+   - **Root Directory**: Leave empty (files are in root now)
    - **Environment**: `Node`
    - **Build Command**: `npm install`
    - **Start Command**: `npm start`
@@ -111,7 +111,6 @@ For production use, consider paid plans:
 
 ```bash
 # Test locally first
-cd server
 npm install
 npm start
 
